@@ -523,7 +523,8 @@ class ByteStringDecoder(SingleDecoder):
         padding_bytes = data[data_length:]
 
         if padding_bytes != b"\x00" * (padded_length - data_length):
-            raise NonEmptyPaddingBytes("Padding bytes were not empty: {0}".format(repr(padding_bytes)))
+            if int.from_bytes(padding_bytes, "big") != 0: # custom
+                raise NonEmptyPaddingBytes("Padding bytes were not empty: {0}".format(repr(padding_bytes)))
 
         return data[:data_length]
 
