@@ -191,17 +191,18 @@ class SingleDecoder(BaseDecoder):
         raise NotImplementedError("Must be implemented by subclasses")
 
     def decode(self, stream):
+
         raw_data = self.read_data_from_stream(stream)
         data, padding_bytes = self.split_data_and_padding(raw_data)
         value = self.decoder_fn(data)
         try:
             self.validate_padding_bytes(value, padding_bytes)
-        except NonEmptyPaddingBytes as e:  ## custom
-            # pass
-            raise e
-        except InsufficientDataBytes as e:  ## custom
-            # pass
-            raise e
+        except NonEmptyPaddingBytes as e: 
+            if int.from_bytes(padding_bytes, "big") != 0: # custom
+                raise e
+        except InsufficientDataBytes as e:
+            if int.from_bytes(padding_bytes, "big") != 0: # custom
+                raise e
 
         return value
 
@@ -304,14 +305,14 @@ class FixedByteSizeDecoder(SingleDecoder):
     def read_data_from_stream(self, stream):
         data = stream.read(self.data_byte_size)
 
-        if len(data) != self.data_byte_size:
-            pass
-            # raise InsufficientDataBytes(
-            #     "Tried to read {0} bytes.  Only got {1} bytes".format(
-            #         self.data_byte_size,
-            #         len(data),
-            #     )
-            # )
+        if len(data) != self.data_byte_size: # custom
+            if len(data) != 0 and int.from_bytes(data, "big") != 0: # custom
+                raise InsufficientDataBytes(
+                    "Tried to read {0} bytes.  Only got {1} bytes".format(
+                        self.data_byte_size,
+                        len(data),
+                    )
+                )
 
         return data
 
@@ -333,8 +334,7 @@ class FixedByteSizeDecoder(SingleDecoder):
         padding_size = self.data_byte_size - value_byte_size
 
         if padding_bytes != b"\x00" * padding_size:
-            pass
-            # raise NonEmptyPaddingBytes("Padding bytes were not empty: {0}".format(repr(padding_bytes)))
+            raise NonEmptyPaddingBytes("Padding bytes were not empty: {0}".format(repr(padding_bytes)))
 
     def _get_value_byte_size(self):
         value_byte_size = self.value_bit_size // 8
@@ -356,7 +356,7 @@ class BooleanDecoder(Fixed32ByteSizeDecoder):
         elif data == b"\x01":
             return True
         else:
-            return True
+            # return True
             raise NonEmptyPaddingBytes("Boolean must be either 0x0 or 0x1.  Got: {0}".format(repr(data)))
 
     @parse_type_str("bool")
@@ -510,10 +510,8 @@ class ByteStringDecoder(SingleDecoder):
     def read_data_from_stream(stream):
         data_length = decode_uint_256(stream)
         padded_length = ceil32(data_length)
-
         data = stream.read(padded_length)
-
-        if len(data) < padded_length:
+        if len(data) < padded_length:  # custom
             pass
             # raise InsufficientDataBytes(
             #     "Tried to read {0} bytes.  Only got {1} bytes".format(
