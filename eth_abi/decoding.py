@@ -198,11 +198,13 @@ class SingleDecoder(BaseDecoder):
         try:
             self.validate_padding_bytes(value, padding_bytes)
         except NonEmptyPaddingBytes as e: 
-            if int.from_bytes(padding_bytes, "big") != 0: # custom
-                raise e
+            # if int.from_bytes(padding_bytes, "big") != 0: # custom
+            #     raise e
+            pass
         except InsufficientDataBytes as e:
-            if int.from_bytes(padding_bytes, "big") != 0: # custom
-                raise e
+            # if int.from_bytes(padding_bytes, "big") != 0: # custom
+            #     raise e
+            pass
 
         return value
 
@@ -306,13 +308,14 @@ class FixedByteSizeDecoder(SingleDecoder):
         data = stream.read(self.data_byte_size)
 
         if len(data) != self.data_byte_size: # custom
-            if len(data) != 0 and int.from_bytes(data, "big") != 0: # custom
-                raise InsufficientDataBytes(
-                    "Tried to read {0} bytes.  Only got {1} bytes".format(
-                        self.data_byte_size,
-                        len(data),
-                    )
-                )
+            pass
+            # if len(data) != 0 and int.from_bytes(data, "big") != 0: # custom
+            #     raise InsufficientDataBytes(
+            #         "Tried to read {0} bytes.  Only got {1} bytes".format(
+            #             self.data_byte_size,
+            #             len(data),
+            #         )
+            #     )
 
         return data
 
@@ -525,8 +528,9 @@ class ByteStringDecoder(SingleDecoder):
         padding_bytes = data[data_length:]
 
         if padding_bytes != b"\x00" * (padded_length - data_length):
-            if int.from_bytes(padding_bytes, "big") != 0: # custom
-                raise NonEmptyPaddingBytes("Padding bytes were not empty: {0}".format(repr(padding_bytes)))
+            pass
+            # if int.from_bytes(padding_bytes, "big") != 0: # custom
+            #     raise NonEmptyPaddingBytes("Padding bytes were not empty: {0}".format(repr(padding_bytes)))
 
         return data[:data_length]
 
