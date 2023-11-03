@@ -361,8 +361,8 @@ class BooleanDecoder(Fixed32ByteSizeDecoder):
         elif data == b"\x02": # uniswap v3 pair swap func exception
             return True
         else:
-            raise NonEmptyPaddingBytes("Boolean must be either 0x0 or 0x1.  Got: {0}".format(repr(data)))
-            # return True
+            # raise NonEmptyPaddingBytes("Boolean must be either 0x0 or 0x1.  Got: {0}".format(repr(data)))
+            return True
 
     @parse_type_str("bool")
     def from_type_str(cls, abi_type, registry):
